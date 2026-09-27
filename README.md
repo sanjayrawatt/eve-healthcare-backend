@@ -107,29 +107,29 @@ provider sends it from a background job about 3 seconds later (see
 
 ## API endpoints
 
-All request and response bodies are JSON. 🔒 = needs `Authorization: Bearer <token>`.
-👑 = ADMIN only.
+All request and response bodies are JSON. Auth column: **Public** = no token, **User** = needs
+`Authorization: Bearer <token>`, **Admin** = token of an ADMIN user, **Signature** = signed webhook.
 
 | Method | Path | Auth | Description |
 |---|---|---|---|
-| POST | `/auth/signup` | — | Create an account → `201 { accessToken, user }` |
-| POST | `/auth/login` | — | Log in → `200 { accessToken, user }` |
-| GET | `/auth/me` | 🔒 | Current user |
-| GET | `/centres?city=&testId=&page=&limit=` | — | Active centres, paginated, filterable |
-| GET | `/centres/:id` | — | Centre with its available tests and prices |
-| GET | `/centres/:id/tests` | — | Tests offered by a centre, with prices |
-| POST | `/centres` | 👑 | Create a centre |
-| POST | `/centres/:id/tests` | 👑 | Offer a test at a centre, with a price |
-| GET | `/tests?search=&page=&limit=` | — | Test catalogue, paginated |
-| POST | `/tests` | 👑 | Create a test |
-| POST | `/bookings` | 🔒 | Book a test → `201`, status `PENDING` |
-| GET | `/bookings?status=&page=&limit=` | 🔒 | Your bookings, newest first |
-| GET | `/bookings/:id` | 🔒 | One of your bookings |
-| PATCH | `/bookings/:id/cancel` | 🔒 | Cancel (safe to repeat) |
-| POST | `/payments/` | 🔒 | Pay for a booking (simulated) |
-| GET | `/payments/:id` | 🔒 | One of your payments |
-| POST | `/payments/webhook/` | signature | Payment-status update from the provider |
-| GET | `/health` | — | Liveness + DB check |
+| POST | `/auth/signup` | Public | Create an account → `201 { accessToken, user }` |
+| POST | `/auth/login` | Public | Log in → `200 { accessToken, user }` |
+| GET | `/auth/me` | User | Current user |
+| GET | `/centres?city=&testId=&page=&limit=` | Public | Active centres, paginated, filterable |
+| GET | `/centres/:id` | Public | Centre with its available tests and prices |
+| GET | `/centres/:id/tests` | Public | Tests offered by a centre, with prices |
+| POST | `/centres` | Admin | Create a centre |
+| POST | `/centres/:id/tests` | Admin | Offer a test at a centre, with a price |
+| GET | `/tests?search=&page=&limit=` | Public | Test catalogue, paginated |
+| POST | `/tests` | Admin | Create a test |
+| POST | `/bookings` | User | Book a test → `201`, status `PENDING` |
+| GET | `/bookings?status=&page=&limit=` | User | Your bookings, newest first |
+| GET | `/bookings/:id` | User | One of your bookings |
+| PATCH | `/bookings/:id/cancel` | User | Cancel (safe to repeat) |
+| POST | `/payments/` | User | Pay for a booking (simulated) |
+| GET | `/payments/:id` | User | One of your payments |
+| POST | `/payments/webhook/` | Signature | Payment-status update from the provider |
+| GET | `/health` | Public | Liveness + DB check |
 
 Both `/payments` and `/payments/` work (the same holds for the webhook path).
 
@@ -146,7 +146,7 @@ Both `/payments` and `/payments/` work (the same holds for the webhook path).
 }
 ```
 
-**Book** `POST /bookings` 🔒
+**Book** `POST /bookings` (User)
 ```json
 { "centreId": "…", "testId": "…", "appointmentAt": "2026-10-05T10:30:00+05:30" }
 ```
@@ -160,7 +160,7 @@ Both `/payments` and `/payments/` work (the same holds for the webhook path).
 }
 ```
 
-**Pay** `POST /payments/` 🔒 — `simulateOutcome` is optional: `SUCCESS`, `FAILED` or `PENDING`
+**Pay** `POST /payments/` (User) — `simulateOutcome` is optional: `SUCCESS`, `FAILED` or `PENDING`
 ```json
 { "bookingId": "…", "simulateOutcome": "SUCCESS" }
 ```
